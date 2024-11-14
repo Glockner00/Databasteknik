@@ -30,3 +30,9 @@ SELECT * FROM jbitem WHERE supplier IN (SELECT id FROM jbsupplier WHERE name = '
 
 /* Task 8 : Same as Task 7 without a subquery */
 SELECT * FROM jbitem WHERE supplier = 89;
+
+/* Task 9 : List all cities that have a supplier in them*/
+SELECT DISTINCT name FROM jbcity WHERE id IN(SELECT city FROM jbsupplier);
+
+/* Task 10 : What is the name and color of the parts heavier than a card reader?*/
+
