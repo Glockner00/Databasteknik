@@ -99,16 +99,16 @@ and the total cost. In the query that defines the view, capture the join
 condition in the WHERE clause (i.e., do not capture the join in the
 FROM clause by using keywords inner join, right join or left join).*/
 DROP VIEW IF EXISTS total_cost_per_debit;
-CREATE VIEW total_cost_per_debit AS SELECT 
-	s.debit,
-	SUM(i.price * s.quantity) AS total_cost_per_debit
+CREATE VIEW total_cost_per_debit AS
+SELECT 
+    s.debit, 
+    SUM(i.price * s.quantity) AS total_cost
 FROM 
-	jbsale s, jbitem i
-WHERE
-	s.item = i.id
-GROUP BY
-	s.debit;
-
+    jbsale s, jbitem i
+WHERE 
+    s.item = i.id
+GROUP BY 
+    s.debit;
 SELECT * FROM total_cost_per_debit;
 
 /* Task 18 : <Right>Do the same as in the previous point, but now capture the join conditions
@@ -116,16 +116,54 @@ in the FROM clause by using only left, right or inner joins. Hence, the
 WHERE clause must not contain any join condition in this case. Motivate
 why you use type of join you do (left, right or inner), and why this is the
 correct one (in contrast to the other types of joins). */
-
-
+DROP VIEW IF EXISTS total_cost_per_debit_joined;
+CREATE VIEW total_cost_per_debit_joined AS
+SELECT
+    s.debit,
+    SUM(i.price * s.quantity) AS total_cost_joined
+FROM
+    jbsale s
+INNER JOIN
+    jbitem i ON s.item = i.id
+GROUP BY
+    s.debit;
+SELECT * FROM total_cost_per_debit_joined;
 
 /* Task 19 : Remove all suppliers in Los Angeles from the jbsupplier table. This
 will not work right away. Instead, you will receive an error with error
 code 23000 which you will have to solve by deleting some other. */
+-- Steg 1: Ta bort relaterade poster i jbsale
+DELETE FROM jbsale
+WHERE item IN (
+    SELECT id FROM jbitem
+    WHERE supplier IN (
+        SELECT id FROM jbsupplier
+        WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
+    )
+);
 
+-- Steg 2: Ta bort relaterade poster i low_price_items
+DELETE FROM low_price_items
+WHERE supplier IN (
+    SELECT id FROM jbsupplier
+    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
+);
 
+-- Steg 3: Ta bort relaterade poster i jbitem
+DELETE FROM jbitem
+WHERE supplier IN (
+    SELECT id FROM jbsupplier
+    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
+);
 
+-- Steg 4: Ta bort relaterade poster i jbsupply
+DELETE FROM jbsupply
+WHERE supplier IN (
+    SELECT id FROM jbsupplier
+    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
+);
 
-
-
+-- Steg 5: Ta bort leverantörerna i jbsupplier
+DELETE FROM jbsupplier
+WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles');
 
