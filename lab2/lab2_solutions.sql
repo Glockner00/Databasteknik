@@ -132,38 +132,16 @@ SELECT * FROM total_cost_per_debit_joined;
 /* Task 19 : Remove all suppliers in Los Angeles from the jbsupplier table. This
 will not work right away. Instead, you will receive an error with error
 code 23000 which you will have to solve by deleting some other. */
--- Steg 1: Ta bort relaterade poster i jbsale
-DELETE FROM jbsale
-WHERE item IN (
-    SELECT id FROM jbitem
-    WHERE supplier IN (
-        SELECT id FROM jbsupplier
-        WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
-    )
-);
 
--- Steg 2: Ta bort relaterade poster i low_price_items
-DELETE FROM low_price_items
-WHERE supplier IN (
-    SELECT id FROM jbsupplier
-    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
-);
+-- (a)
+SET SQL_SAFE_UPDATES = 0;
+SELECT id FROM jbsupplier WHERE city = 'Los Angeles';
+DELETE FROM jbitem WHERE supplier IN(SELECT id FROM jbsupplier WHERE city = 'Los Angeles');
+DELETE FROM jbsupplier WHERE city = 'Los Angeles';
+SET SQL_SAFE_UPDATES = 1;
 
--- Steg 3: Ta bort relaterade poster i jbitem
-DELETE FROM jbitem
-WHERE supplier IN (
-    SELECT id FROM jbsupplier
-    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
-);
+--(b) explaination: Vi identifierar leverantörer i Los Angeles och tog bort de objekt (jbitem)
+--som var kopplade till dessa leverantörer för att lösa referensintegritetsproblem. Därefter 
+--kunde vi ta bort leverantörererna från jbsupplier som hade cit = 'los angeles'. 
 
--- Steg 4: Ta bort relaterade poster i jbsupply
-DELETE FROM jbsupply
-WHERE supplier IN (
-    SELECT id FROM jbsupplier
-    WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles')
-);
-
--- Steg 5: Ta bort leverantörerna i jbsupplier
-DELETE FROM jbsupplier
-WHERE city = (SELECT id FROM jbcity WHERE name = 'Los Angeles');
 
