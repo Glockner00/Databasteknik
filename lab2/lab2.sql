@@ -129,11 +129,6 @@ GROUP BY
     s.debit;
 SELECT * FROM total_cost_per_debit_joined;
 
-/*
-Motivation: We used inner join between jbsale and jbitem because we only want to unclide sales where there is a corresponding item entry in jbitem. Using a left or right join would include unmatched records which would lead to incomplete cost calculations.
-
-*/
-
 /* Task 19 : Remove all suppliers in Los Angeles from the jbsupplier table. This
 will not work right away. Instead, you will receive an error with error
 code 23000 which you will have to solve by deleting some other. */
@@ -145,31 +140,8 @@ DELETE FROM jbitem WHERE supplier IN(SELECT id FROM jbsupplier WHERE city = 'Los
 DELETE FROM jbsupplier WHERE city = 'Los Angeles';
 SET SQL_SAFE_UPDATES = 1;
 
-/*(b) explaination: First we disabled SQL_SAFE_UPDATES to allow the DELETE operation. We then removed items linked to suppliers in LA to resovle referential issues. We then deleted the suppliers from jbsupplier and finally re-enabeĺed SQL_SAFE_UPDATES.*/ 
-
-/* Task 20 : Drop and redefine jbsale_supply to include suppliers that have delivered items that have not been sold.*/
-
-DROP VIEW IF EXISTS jbsale_supply;
-CREATE VIEW jbsale_supply (supplier, item, quantity) AS
-SELECT 
-    jbsupplier.name AS supplier, 
-    jbitem.name AS item, 
-    COALESCE(jbsale.quantity, 0) AS quantity
-FROM 
-    jbsupplier
-JOIN 
-    jbitem ON jbsupplier.id = jbitem.supplier
-LEFT JOIN 
-    jbsale ON jbitem.id = jbsale.item;
-
-SELECT supplier, SUM(quantity) AS sum
-FROM 
-    jbsale_supply
-GROUP BY 
-    supplier;
-
-
-
-
+--(b) explaination: Vi identifierar leverantörer i Los Angeles och tog bort de objekt (jbitem)
+--som var kopplade till dessa leverantörer för att lösa referensintegritetsproblem. Därefter 
+--kunde vi ta bort leverantörererna från jbsupplier som hade cit = 'los angeles'. 
 
 
